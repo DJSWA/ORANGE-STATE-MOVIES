@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ORANGE STATE WEB</title>
+    <style>
+        body { margin: 0; font-family: Arial, sans-serif; background-color: #0f0f0f; color: white; }
+        header { background: orange; padding: 15px; text-align: center; font-size: 24px; font-weight: bold; color: black; }
+        nav { display: flex; justify-content: center; gap: 20px; padding: 10px; background: #1a1a1a; }
+        nav button { background: none; border: none; color: orange; font-weight: bold; cursor: pointer; }
+        .container { padding: 20px; }
+        .movie-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+        .movie-card { background: #1c1c1c; padding: 10px; border-radius: 8px; text-align: center; }
+        .movie-card video { width: 100%; border-radius: 8px; }
+        .movie-card h3 { margin: 10px 0; }
+        .btn { display: inline-block; padding: 8px 12px; margin: 5px; border-radius: 4px; border: none; cursor: pointer; }
+        .stream { background: orange; color: black; }
+        .download { background: #333; color: white; }
+        .admin-panel { background: #1c1c1c; padding: 20px; border-radius: 10px; max-width: 500px; margin: 20px auto; display: none; }
+        input, textarea { width: 100%; padding: 8px; margin: 8px 0; border-radius: 5px; border: none; }
+        footer { text-align: center; padding: 15px; background: #1a1a1a; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+<header>ORANGE STATE WEB</header>
+
+<nav>
+    <button onclick="showHome()">Home</button>
+    <button onclick="showAdmin()">Admin</button>
+</nav>
+
+<div class="container" id="homeSection">
+    <h2>All Movies (Action Streaming)</h2>
+    <div class="movie-grid" id="movieGrid"></div>
+</div>
+
+<div class="admin-panel" id="adminSection">
+    <h2>Admin Panel - Upload Movie</h2>
+    <input type="text" id="movieTitle" placeholder="Movie Title" />
+    <textarea id="movieDescription" placeholder="Movie Description"></textarea>
+    <input type="file" id="movieFile" accept="video/*" />
+    <button class="btn stream" onclick="uploadMovie()">Upload Movie</button>
+</div>
+
+<footer>
+    © 2026 ORANGE STATE WEB | Admin Powered Streaming
+</footer>
+
+<script>
+    let movies = JSON.parse(localStorage.getItem("orangeMovies")) || [];
+
+    function saveMovies() {
+        localStorage.setItem("orangeMovies", JSON.stringify(movies));
+    }
+
+    function renderMovies() {
+        const grid = document.getElementById("movieGrid");
+        grid.innerHTML = "";
+
+        movies.forEach((movie) => {
+            const card = document.createElement("div");
+            card.className = "movie-card";
+
+            card.innerHTML = `
+                <video controls src="${movie.video}"></video>
+                <h3>${movie.title}</h3>
+                <p>${movie.description}</p>
+                <a href="${movie.video}" download class="btn download">Download</a>
+            `;
+
+            grid.appendChild(card);
+        });
+    }
+
+    function uploadMovie() {
+        const title = document.getElementById("movieTitle").value;
+        const description = document.getElementById("movieDescription").value;
+        const fileInput = document.getElementById("movieFile");
+        const file = fileInput.files[0];
+
+        if (!title || !file) {
+            alert("Please enter title and select video file");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            movies.push({
+                title: title,
+                description: description,
+                video: e.target.result
+            });
+
+            saveMovies();
+            renderMovies();
+            alert("Movie Uploaded Successfully!");
+
+            document.getElementById("movieTitle").value = "";
+            document.getElementById("movieDescription").value = "";
+            document.getElementById("movieFile").value = "";
+        };
+
+        reader.readAsDataURL(file);
+    }
+
+    function showAdmin() {
+        document.getElementById("adminSection").style.display = "block";
+        document.getElementById("homeSection").style.display = "none";
+    }
+
+    function showHome() {
+        document.getElementById("adminSection").style.display = "none";
+        document.getElementById("homeSection").style.display = "block";
+    }
+
+    renderMovies();
+</script>
+
+</body>
+</html>
